@@ -1,5 +1,6 @@
 ---
 import penguins from "../assets/penguins.json";
+import cars from "../assets/cars.json";
 export const prerender = false;
 import PlotFigure from "../components/PlotFigure.astro";
 import * as Plot from "@observablehq/plot";
@@ -12,6 +13,19 @@ const filteredPenguins = species
   : penguins;
 
 const allSpecies = [...new Set(penguins.map(p => p.species))];
+
+// Données des voitures
+const { year } = Astro.params;
+const filteredCars = year 
+  ? cars.filter((car) => car.year === parseInt(year))
+  : cars;
+
+const allYears = [...new Set(cars.map(c => c.year).filter(Boolean))].sort((a, b) => a - b);
+
+// Filtrer les voitures avec des données valides pour le graphique
+const safeCars = filteredCars.filter(car => 
+  car["power (hp)"] != null && car["weight (lb)"] != null
+);
 
 const plotOptions = {
   grid: true,
@@ -34,18 +48,43 @@ const plotOptions = {
     ? `Relation Longueur vs Profondeur du bec - ${species}` 
     : "Relation Longueur vs Profondeur du bec - Tous les pingouins",
 };
+
+// Options de graphique pour les voitures
+const carsPlotOptions = {
+  grid: true,
+  marks: [
+    Plot.dot(safeCars, {
+      x: "weight (lb)",
+      y: "power (hp)",
+      fill: year ? "orange" : "year",
+      r: 4,
+      fillOpacity: 0.7,
+    }),
+  ],
+  x: {
+    label: "Poids (lb)",
+  },
+  y: {
+    label: "Puissance (hp)",
+  },
+  title: year 
+    ? `Relation Puissance vs Poids - Voitures ${year}` 
+    : "Relation Puissance vs Poids - Toutes les voitures",
+};
 ---
 
 <Layout>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <div class="text-center mb-12">
       <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-        {species ? `Pingouins ${species}` : "Analyse des Pingouins"}
+        {species ? `Pingouins ${species}` : year ? `Voitures ${year}` : "Analyse des Données"}
       </h1>
       <p class="text-xl text-gray-600 mb-8">
         {species 
           ? `${filteredPenguins.length} pingouin(s) de l'espèce ${species}` 
-          : `Explorez les données de ${filteredPenguins.length} pingouins à travers différentes visualisations`
+          : year
+            ? `${filteredCars.length} voiture(s) de l'année ${year}`
+            : `Explorez les données de ${filteredPenguins.length} pingouins et ${cars.length} voitures`
         }
       </p>
     </div>
@@ -120,6 +159,25 @@ const plotOptions = {
       <PlotFigure options={plotOptions} />
     </div>
 
+    <!-- Section pour les voitures -->
+    <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mt-8">
+      <div class="mb-4">
+        <h2 class="text-2xl font-semibold text-gray-900 mb-2">
+          {year ? `Analyse de l'année ${year}` : "Vue d'ensemble de toutes les années"}
+        </h2>
+        <p class="text-gray-600">
+          Relation entre la puissance et le poids des voitures
+        </p>
+        <p class="text-sm text-gray-500 mt-2">
+          {year
+            ? `${filteredCars.length} voiture(s) de l'année ${year}` 
+            : `${cars.length} voitures au total (${safeCars.length} avec données complètes)`
+          }
+        </p>
+      </div>
+      <PlotFigure options={carsPlotOptions} />
+    </div>
+
     {species && (
       <div class="mt-8 text-center">
         <a 
@@ -130,6 +188,20 @@ const plotOptions = {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
           Retour à la vue d'ensemble
+        </a>
+      </div>
+    )}
+
+    {year && (
+      <div class="mt-8 text-center">
+        <a 
+          href="/" 
+          class="inline-flex items-center text-orange-600 hover:text-orange-800 font-medium"
+        >
+          <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+          </svg>
+          Retour à la vue d'ensemble des voitures
         </a>
       </div>
     )}
