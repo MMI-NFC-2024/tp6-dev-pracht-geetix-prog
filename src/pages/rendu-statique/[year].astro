@@ -1,0 +1,159 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PlotFigure from "../../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import cars from "../../assets/cars.json";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+    const allYears = [
+        ...new Set(cars.map((c) => c.year).filter(Boolean)),
+    ].sort((a, b) => a - b);
+    
+    return allYears.map((year) => ({
+        params: { year: String(year) },
+        props: {
+            year: year,
+            filteredCars: cars.filter((c) => c.year === year),
+            allYears,
+        },
+    }));
+}
+
+const { year, filteredCars = [], allYears = [] } = Astro.props;
+
+// Si appelé sans param/props, on retourne à l'index.
+if (!year) {
+    return Astro.redirect("/rendu-statique/");
+}
+
+const safeCars = filteredCars.filter(
+    (c) => c["power (hp)"] != null && c["weight (lb)"] != null,
+);
+
+const plotOptions = {
+    grid: true,
+    marks: [
+        Plot.dot(safeCars, {
+            x: "weight (lb)",
+            y: "power (hp)",
+            r: 4,
+            fill: "orange",
+        }),
+    ],
+    x: { label: "Poids (lb)" },
+    y: { label: "Puissance (hp)" },
+    title: `Relation Puissance vs Poids - Voitures ${year}`,
+};
+---
+
+<Layout>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-orange-600">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                        </svg>
+                        Accueil
+                    </a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <a href="/rendu-statique/" class="ml-1 text-sm font-medium text-gray-700 hover:text-orange-600 md:ml-2">Rendu Statique</a>
+                    </div>
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{year}</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="bg-gradient-to-r from-orange-50 to-amber-50 rounded-lg p-6 mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        Voitures {year}
+                    </h1>
+                    <p class="text-lg text-gray-600">
+                        {safeCars.length} voiture(s) de l'année {year} avec données complètes
+                    </p>
+                    <p class="text-sm text-gray-500 mt-1">
+                        {filteredCars.length} voiture(s) au total pour cette année
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                        📊 Rendu Statique
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg border border-gray-200 p-6 mb-8">
+            <PlotFigure options={plotOptions} />
+        </div>
+
+        <!-- Section avec informations sur les voitures de cette année -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                Quelques voitures de {year}
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredCars.slice(0, 6).map((car) => (
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200">
+                        <h4 class="font-semibold text-gray-900 mb-2 text-sm">{car.name}</h4>
+                        <div class="space-y-1 text-xs text-gray-600">
+                            {car["power (hp)"] && <div>🏎️ {car["power (hp)"]} hp</div>}
+                            {car["weight (lb)"] && <div>⚖️ {car["weight (lb)"]} lb</div>}
+                            {car["economy (mpg)"] && <div>⛽ {car["economy (mpg)"]} mpg</div>}
+                            {car.cylinders && <div>🔧 {car.cylinders} cylindres</div>}
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {filteredCars.length > 6 && (
+                <p class="text-sm text-gray-500 mt-4 text-center">
+                    ... et {filteredCars.length - 6} autres voitures de {year}
+                </p>
+            )}
+        </div>
+
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">
+                Autres années disponibles
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {allYears
+                    .filter(y => y !== year)
+                    .map((yearNumber) => (
+                        <a 
+                            href={`/rendu-statique/${yearNumber}`}
+                            class="group flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-orange-300 hover:bg-orange-50 transition-all duration-200"
+                        >
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-orange-400 rounded-full mr-3"></div>
+                                <span class="font-medium text-gray-900 group-hover:text-orange-700">
+                                    {yearNumber}
+                                </span>
+                            </div>
+                            <svg class="w-4 h-4 text-gray-400 group-hover:text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    ))
+                }
+            </div>
+        </div>
+    </div>
+</Layout>

@@ -1,37 +1,42 @@
 ---
-import Layout from "../../layouts/Layout.astro";
-import PlotFigure from "../../components/PlotFigure.astro";
+import Layout from "../../../layouts/Layout.astro";
+import PlotFigure from "../../../components/PlotFigure.astro";
 import * as Plot from "@observablehq/plot";
-import penguins from "../../assets/penguins.json";
+import cars from "../../../assets/cars.json";
 
 export const prerender = false;
 
-const { species } = Astro.params;
+const { year } = Astro.params;
 
-const filteredPenguins = penguins.filter(
-    (penguin) => penguin.species === species,
+const filteredCars = year ? cars.filter(
+    (car) => car.year === parseInt(year),
+) : [];
+
+const allYears = [...new Set(cars.map((c) => c.year))].sort((a, b) => a - b);
+
+// Filtrer les voitures avec des données valides pour le graphique
+const safeCars = filteredCars.filter(
+    (c) => c["power (hp)"] != null && c["weight (lb)"] != null,
 );
-
-const allSpecies = [...new Set(penguins.map((p) => p.species))];
 
 const plotOptions = {
     grid: true,
     marks: [
-        Plot.dot(filteredPenguins, {
-            x: "culmen_length_mm",
-            y: "culmen_depth_mm",
+        Plot.dot(safeCars, {
+            x: "weight (lb)",
+            y: "power (hp)",
             fill: "steelblue",
             r: 4,
             fillOpacity: 0.7,
         }),
     ],
     x: {
-        label: "Longueur du bec (mm)",
+        label: "Poids (lb)",
     },
     y: {
-        label: "Profondeur du bec (mm)",
+        label: "Puissance (hp)",
     },
-    title: `Relation Longueur vs Profondeur du bec - ${species}`,
+    title: `Relation Puissance vs Poids - Voitures ${year}`,
 };
 ---
 
@@ -60,7 +65,7 @@ const plotOptions = {
                         <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                         </svg>
-                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{species}</span>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">{year}</span>
                     </div>
                 </li>
             </ol>
@@ -70,10 +75,10 @@ const plotOptions = {
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                        Pingouins {species}
+                        Voitures {year}
                     </h1>
                     <p class="text-lg text-gray-600">
-                        {filteredPenguins.length} pingouin(s) de l'espèce {species}
+                        {filteredCars.length} voiture(s) de l'année {year}
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0">
@@ -84,16 +89,16 @@ const plotOptions = {
             </div>
         </div>
 
-        {filteredPenguins.length === 0 ? (
+        {filteredCars.length === 0 ? (
             <div class="bg-red-50 border border-red-200 rounded-lg p-8 text-center">
                 <svg class="mx-auto h-12 w-12 text-red-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
                 <h2 class="text-xl font-semibold text-red-800 mb-2">
-                    Aucun pingouin trouvé
+                    Aucune voiture trouvée
                 </h2>
                 <p class="text-red-600">
-                    L'espèce "{species}" n'existe pas dans nos données.
+                    L'année "{year}" n'existe pas dans nos données.
                 </p>
             </div>
         ) : (
@@ -104,20 +109,20 @@ const plotOptions = {
 
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h3 class="text-xl font-semibold text-gray-900 mb-4">
-                Autres espèces disponibles
+                Autres années disponibles
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                {allSpecies
-                    .filter(s => s !== species)
-                    .map((speciesName) => (
+                {allYears
+                    .filter(y => y !== parseInt(year || "0"))
+                    .map((yearNumber) => (
                         <a 
-                            href={`/rendu-dynamique/${speciesName}`}
+                            href={`/rendu-dynamique/annees/${yearNumber}`}
                             class="group flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
                         >
                             <div class="flex items-center">
                                 <div class="w-3 h-3 bg-purple-400 rounded-full mr-3"></div>
                                 <span class="font-medium text-gray-900 group-hover:text-purple-700">
-                                    {speciesName}
+                                    {yearNumber}
                                 </span>
                             </div>
                             <svg class="w-4 h-4 text-gray-400 group-hover:text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">

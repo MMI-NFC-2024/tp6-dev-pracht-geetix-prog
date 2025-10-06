@@ -1,8 +1,10 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import penguins from "../../assets/penguins.json";
+import cars from "../../assets/cars.json";
 
 const allSpecies = [...new Set(penguins.map((p) => p.species).filter(Boolean))];
+const allYears = [...new Set(cars.map((c) => c.year).filter(Boolean))].sort((a, b) => a - b);
 ---
 
 <Layout>
@@ -32,10 +34,10 @@ const allSpecies = [...new Set(penguins.map((p) => p.species).filter(Boolean))];
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-900 mb-2">
-                        Espèces de Pingouins
+                        Espèces de Pingouins & Années de Voitures
                     </h1>
                     <p class="text-lg text-gray-600">
-                        Explorez les données par espèce - Pages générées statiquement
+                        Explorez les données par espèce et par année - Pages générées statiquement
                     </p>
                 </div>
                 <div class="mt-4 sm:mt-0">
@@ -46,32 +48,72 @@ const allSpecies = [...new Set(penguins.map((p) => p.species).filter(Boolean))];
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {allSpecies.map((species) => {
-                const speciesData = penguins.filter(p => p.species === species);
-                return (
-                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                        <div class="p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xl font-semibold text-gray-900">{species}</h3>
-                                <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                🐧 Espèces de Pingouins
+                <span class="ml-3 text-sm font-normal text-gray-500">({allSpecies.length} espèces)</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {allSpecies.map((species) => {
+                    const speciesData = penguins.filter(p => p.species === species);
+                    return (
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                            <div class="p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-xl font-semibold text-gray-900">{species}</h3>
+                                    <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                                </div>
+                                <p class="text-gray-600 mb-4">
+                                    {speciesData.length} pingouins dans nos données
+                                </p>
+                                <a 
+                                    href={`/rendu-statique/${encodeURIComponent(String(species))}`}
+                                    class="inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                                >
+                                    Voir les données
+                                    <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
                             </div>
-                            <p class="text-gray-600 mb-4">
-                                {speciesData.length} pingouins dans nos données
-                            </p>
-                            <a 
-                                href={`/rendu-statique/${encodeURIComponent(String(species))}`}
-                                class="inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
-                            >
-                                Voir les données
-                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </a>
                         </div>
-                    </div>
-                );
-            })}
+                    );
+                })}
+            </div>
+        </div>
+
+        <div class="mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                🚗 Années de Voitures
+                <span class="ml-3 text-sm font-normal text-gray-500">({allYears.length} années)</span>
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {allYears.map((year) => {
+                    const yearData = cars.filter(c => c.year === year);
+                    return (
+                        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                            <div class="p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="text-lg font-semibold text-gray-900">{year}</h3>
+                                    <div class="w-3 h-3 bg-orange-400 rounded-full"></div>
+                                </div>
+                                <p class="text-gray-600 mb-3 text-sm">
+                                    {yearData.length} voitures
+                                </p>
+                                <a 
+                                    href={`/rendu-statique/${year}`}
+                                    class="inline-flex items-center justify-center w-full px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 transition-colors duration-200"
+                                >
+                                    Voir les données
+                                    <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
 
         <div class="mt-12 bg-gray-50 rounded-lg p-6">
