@@ -1,0 +1,94 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import PlotFigure from "../../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import penguins from "../../assets/penguins.json";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+    const allSpecies = [
+        ...new Set(penguins.map((p) => p.species).filter(Boolean)),
+    ];
+    return allSpecies.map((species) => ({
+        params: { species: String(species) },
+        props: {
+            species,
+            filteredPenguins: penguins.filter((p) => p.species === species),
+            allSpecies,
+        },
+    }));
+}
+
+const { species, filteredPenguins = [], allSpecies = [] } = Astro.props;
+
+// Si appelé sans param/props, on retourne à l’index.
+if (!species) {
+    return Astro.redirect("/rendu-statique/");
+}
+
+const safePenguins = filteredPenguins.filter(
+    (p) => p.culmen_length_mm != null && p.culmen_depth_mm != null,
+);
+
+const plotOptions = {
+    grid: true,
+    marks: [
+        Plot.dot(safePenguins, {
+            x: "culmen_length_mm",
+            y: "culmen_depth_mm",
+            r: 4,
+        }),
+    ],
+    x: { label: "Longueur du bec (mm)" },
+    y: { label: "Profondeur du bec (mm)" },
+    title: `Relation Longueur vs Profondeur du bec - ${species}`,
+};
+---
+
+<Layout>
+    <div class="max-w-6xl mx-auto p-6">
+        <div class="mb-6">
+            <a href="/rendu-statique/" class="text-blue-600 underline"
+                >← Retour à la liste des espèces</a
+            >
+        </div>
+
+        <h1 class="text-3xl font-bold mb-2">Pingouins {species}</h1>
+
+        {
+            safePenguins.length === 0 ? (
+                <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                    <h2 class="text-xl font-semibold text-red-800 mb-2">
+                        Aucun pingouin trouvé
+                    </h2>
+                    <p class="text-red-600">
+                        L'espèce "{species}" n'existe pas dans nos données.
+                    </p>
+                </div>
+            ) : (
+                <div class="bg-white rounded-lg shadow-sm border p-6">
+                    <PlotFigure options={plotOptions} />
+                </div>
+            )
+        }
+
+        <div class="mt-8">
+            <h3 class="text-xl font-semibold mb-4">Autres espèces :</h3>
+            <div class="flex flex-wrap gap-3">
+                {
+                    allSpecies
+                        .filter((s) => s !== species)
+                        .map((s) => (
+                            <a
+                                href={`/rendu-statique/${encodeURIComponent(String(s))}/`}
+                                class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg"
+                            >
+                                {s}
+                            </a>
+                        ))
+                }
+            </div>
+        </div>
+    </div>
+</Layout>

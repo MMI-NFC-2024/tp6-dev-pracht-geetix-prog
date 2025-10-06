@@ -1,0 +1,24 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import penguins from "../../assets/penguins.json";
+
+const allSpecies = [...new Set(penguins.map((p) => p.species).filter(Boolean))];
+---
+
+<Layout>
+    <div class="max-w-6xl mx-auto p-6">
+        <h1 class="text-3xl font-bold mb-6">Espèces de pingouins</h1>
+        <div class="flex flex-wrap gap-3">
+            {
+                allSpecies.map((s) => (
+                    <a
+                        href={`/rendu-statique/${encodeURIComponent(String(s))}/`}
+                        class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg"
+                    >
+                        {s}
+                    </a>
+                ))
+            }
+        </div>
+    </div>
+</Layout>
