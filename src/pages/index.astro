@@ -37,21 +37,39 @@ const plotOptions = {
 ---
 
 <Layout>
-  <h1 class="text-2xl">
+  <h1 class="text-3xl font-bold mb-4">
     {species ? `Pingouins ${species}` : "Tous les pingouins"}
   </h1>
-  <p>{filteredPenguins.length} pingouin(s) {species ? `de l'espèce ${species}` : "au total"}</p>
+  <p class="text-lg text-gray-700 mb-6">
+    {filteredPenguins.length} pingouin(s) {species ? `de l'espèce ${species}` : "au total"}
+  </p>
 
   {!species && (
-    <div>
-      <h2>Navigation par espèce :</h2>
-      {allSpecies.map((speciesName) => (
-        <a href={`/${speciesName}`} style="margin-right: 10px; color: blue;">
-          {speciesName}
+    <div class="mb-8">
+      <h2 class="text-xl font-semibold mb-4">Navigation par espèce :</h2>
+      <div class="flex flex-wrap gap-3 mb-6">
+        {allSpecies.map((speciesName) => (
+          <a 
+            href={`/${speciesName}`} 
+            class="text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors duration-200 px-2 py-1 rounded hover:bg-blue-50"
+          >
+            {speciesName}
+          </a>
+        ))}
+      </div>
+      
+      <div class="mt-6">
+        <a 
+          href="/rendu-dynamique/" 
+          class="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+        >
+          Rendu Dynamique
         </a>
-      ))}
+      </div>
     </div>
   )}
 
-  <PlotFigure options={plotOptions} />
+  <div class="bg-white p-4 rounded-lg shadow-sm border">
+    <PlotFigure options={plotOptions} />
+  </div>
 </Layout>

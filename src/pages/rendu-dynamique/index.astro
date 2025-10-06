@@ -1,0 +1,46 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import penguins from "../../assets/penguins.json";
+
+const species = [...new Set(penguins.map((p) => p.species))];
+
+const speciesCount = species.map((s) => ({
+    name: s,
+    count: penguins.filter((p) => p.species === s).length,
+}));
+---
+
+<Layout>
+    <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Espèces de Pingouins</h1>
+        <p class="text-lg text-gray-600 mb-8">Explorez les données des différentes espèces de pingouins :</p>
+
+        <ul class="space-y-4 mb-8">
+            {
+                speciesCount.map((species) => (
+                    <li class="bg-white p-4 rounded-lg shadow-sm border hover:shadow-md transition-shadow duration-200">
+                        <a
+                            href={`/rendu-dynamique/${species.name}`}
+                            class="text-blue-600 hover:text-blue-800 text-xl font-semibold underline hover:no-underline transition-colors duration-200"
+                        >
+                            {species.name}
+                        </a>
+                        <span class="text-gray-500 ml-3 text-sm">
+                            ({species.count} pingouins)
+                        </span>
+                    </li>
+                ))
+            }
+        </ul>
+
+        <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+            <a
+                href="/"
+                class="inline-flex items-center text-green-700 hover:text-green-900 text-lg font-bold underline hover:no-underline transition-colors duration-200"
+            >
+                <span class="mr-2">←</span>
+                Retour à l'accueil - Voir tous les pingouins
+            </a>
+        </div>
+    </div>
+</Layout>
