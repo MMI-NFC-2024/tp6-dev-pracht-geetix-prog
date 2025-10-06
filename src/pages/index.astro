@@ -1,21 +1,57 @@
 ---
-import PlotFigure from "../components/PlotFigure.astro";
-import Layout from "../layouts/Layout.astro";
-import * as Plot from "@observablehq/plot";
 import penguins from "../assets/penguins.json";
+export const prerender = false;
+import PlotFigure from "../components/PlotFigure.astro";
+import * as Plot from "@observablehq/plot";
+import Layout from "../layouts/Layout.astro";
+
+const { species } = Astro.params;
+
+const filteredPenguins = species 
+  ? penguins.filter((penguin) => penguin.species === species)
+  : penguins;
+
+const allSpecies = [...new Set(penguins.map(p => p.species))];
+
+const plotOptions = {
+  grid: true,
+  marks: [
+    Plot.dot(filteredPenguins, {
+      x: "culmen_length_mm",
+      y: "culmen_depth_mm",
+      fill: species ? "steelblue" : "species",
+      r: 4,
+      fillOpacity: 0.7,
+    }),
+  ],
+  x: {
+    label: "Longueur du bec (mm)",
+  },
+  y: {
+    label: "Profondeur du bec (mm)",
+  },
+  title: species 
+    ? `Relation Longueur vs Profondeur du bec - ${species}` 
+    : "Relation Longueur vs Profondeur du bec - Tous les pingouins",
+};
 ---
 
 <Layout>
-  <h1 class="text-2xl">Test Astro et Plot (Observablehq)</h1>
-  <PlotFigure
-    options={{
-      marks: [
-        Plot.dot(penguins, {
-          x: "culmen_length_mm",
-          y: "culmen_depth_mm",
-          stroke: "species",
-        }),
-      ],
-    }}
-  />
+  <h1 class="text-2xl">
+    {species ? `Pingouins ${species}` : "Tous les pingouins"}
+  </h1>
+  <p>{filteredPenguins.length} pingouin(s) {species ? `de l'espèce ${species}` : "au total"}</p>
+
+  {!species && (
+    <div>
+      <h2>Navigation par espèce :</h2>
+      {allSpecies.map((speciesName) => (
+        <a href={`/${speciesName}`} style="margin-right: 10px; color: blue;">
+          {speciesName}
+        </a>
+      ))}
+    </div>
+  )}
+
+  <PlotFigure options={plotOptions} />
 </Layout>
