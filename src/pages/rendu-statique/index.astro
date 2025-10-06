@@ -6,19 +6,85 @@ const allSpecies = [...new Set(penguins.map((p) => p.species).filter(Boolean))];
 ---
 
 <Layout>
-    <div class="max-w-6xl mx-auto p-6">
-        <h1 class="text-3xl font-bold mb-6">Espèces de pingouins</h1>
-        <div class="flex flex-wrap gap-3">
-            {
-                allSpecies.map((s) => (
-                    <a
-                        href={`/rendu-statique/${encodeURIComponent(String(s))}/`}
-                        class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg"
-                    >
-                        {s}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <nav class="flex mb-8" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+                        </svg>
+                        Accueil
                     </a>
-                ))
-            }
+                </li>
+                <li aria-current="page">
+                    <div class="flex items-center">
+                        <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Rendu Statique</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 mb-8">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                        Espèces de Pingouins
+                    </h1>
+                    <p class="text-lg text-gray-600">
+                        Explorez les données par espèce - Pages générées statiquement
+                    </p>
+                </div>
+                <div class="mt-4 sm:mt-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        ⚡ Rendu Statique
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {allSpecies.map((species) => {
+                const speciesData = penguins.filter(p => p.species === species);
+                return (
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow duration-200">
+                        <div class="p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-xl font-semibold text-gray-900">{species}</h3>
+                                <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
+                            </div>
+                            <p class="text-gray-600 mb-4">
+                                {speciesData.length} pingouins dans nos données
+                            </p>
+                            <a 
+                                href={`/rendu-statique/${encodeURIComponent(String(species))}`}
+                                class="inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors duration-200"
+                            >
+                                Voir les données
+                                <svg class="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+
+        <div class="mt-12 bg-gray-50 rounded-lg p-6">
+            <div class="flex items-center mb-4">
+                <svg class="w-6 h-6 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-900">À propos du rendu statique</h3>
+            </div>
+            <p class="text-gray-600">
+                Ces pages sont générées au moment du build grâce à <code class="bg-gray-200 px-2 py-1 rounded text-sm">getStaticPaths()</code>. 
+                Cela garantit des performances optimales et un référencement SEO parfait.
+            </p>
         </div>
     </div>
 </Layout>
